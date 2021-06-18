@@ -79,7 +79,7 @@ class Display {
              <td>${book.title}</td>
              <td>${book.author}</td>
              <td>${book.genre}</td>
-             <td><button type="button" class="btn-close" aria-label="Close" id="${index}" onclick="deleteBook(this.id)"></button></td>
+             <td><button  type="button" class="btn-close btn-close-red" aria-label="Close" id="${index}" onclick="deleteBook(this.id)"></button></td>
              </tr>`;
         });
     }
