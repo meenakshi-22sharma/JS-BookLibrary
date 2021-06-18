@@ -1,4 +1,5 @@
-let libraryForm = document.getElementById('form');
+//global form object
+var libraryForm = document.getElementById('form');
 class Book {
     //constructor
     constructor(title, author, genre) {
@@ -6,14 +7,14 @@ class Book {
         this.author = author;
         this.genre = genre;
     }
+
+    //add Book data
     addBook() {
-        let tableBody = document.getElementById('tableBody');
-        let html = `  <tr>    
-                <td>${this.title}</td>
-                <td>${this.author}</td>
-                <td>${this.genre}</td>
-                </tr>`;
-        tableBody.innerHTML += html;
+        addDataToLocalStorage(this);
+    }
+
+    //remove book data
+    removeBook() {
 
     }
     //validate Book object
@@ -23,11 +24,37 @@ class Book {
         }
         return true;
     }
+
+
+
+};
+
+//add the data to local storage
+function addDataToLocalStorage(_bookObject) {
+    let books = localStorage.getItem('books');
+    let oldBooks;
+    if (books) {
+        oldBooks = JSON.parse(books); //parse data from local storage
+    } else {
+        oldBooks = [];
+    }
+    oldBooks.push(_bookObject);
+
+    localStorage.setItem('books', JSON.stringify(oldBooks));
+    Display.loadDataCards(oldBooks);
+
+};
+
+//Display function for window screen
+class Display {
+
+    //clear out the form
     static clear() {
         libraryForm.reset()
     }
 
-    static show(type,message) {
+    //send alerts to the user if form submitted succesffuly or with error
+    static show(type, message) {
         let divAlert = document.getElementById('alertMessage');
         divAlert.innerHTML = `  <div class="alert alert-${type} alert-dismissible fade show" role="alert">
        <strong>Message !</strong> ${message}.
@@ -35,19 +62,49 @@ class Book {
      </div>`;
 
 
-     //fade away message from 2 sec
-     setTimeout(() => {
-        divAlert.innerHTML=``;
-     }, 2000);
+        //fade away message from 2 sec
+        setTimeout(() => {
+            divAlert.innerHTML = ``;
+        }, 2000);
 
     }
 
-
+    //load the table with data from storage
+    static loadDataCards(_bookArray) {
+        let tableBody = document.getElementById('tableBody');
+        let html='';
+        if(_bookArray.length>0){
+        _bookArray.forEach((book,index) => {
+             html+=` <tr>    
+             <td>${book.title}</td>
+             <td>${book.author}</td>
+             <td>${book.genre}</td>
+             <td><button type="button" class="btn-close" aria-label="Close" id="${index}" onclick="deleteBook(this.id)"></button></td>
+             </tr>`;
+        });
+    }
+    else{
+        html+='';
+    }
+        tableBody.innerHTML = html;
+    }
 };
 
-
-libraryForm.addEventListener('submit', libraryFormSubmit);
-
+function deleteBook(_bookID){
+    console.log('deleting')
+    let books = localStorage.getItem('books');
+    let oldBooks;
+    if (books) {
+        oldBooks = JSON.parse(books); //parse data from local storage
+    } else {
+        oldBooks = [];
+    }
+     
+    oldBooks.splice(_bookID,1);
+    localStorage.setItem('books', JSON.stringify(oldBooks));
+    Display.loadDataCards(oldBooks);
+}
+//Add new book and show alerts
 function libraryFormSubmit(event) {
 
     let title = document.getElementById('title').value;
@@ -63,10 +120,27 @@ function libraryFormSubmit(event) {
 
     if (newBook.validate()) {
         newBook.addBook();
-        Book.show('success','Book added successfully');
+        Display.show('success', 'Book added successfully');
     } else {
-        Book.show('danger','Sorry enter a valid book');
+        Display.show('danger', 'Sorry enter a valid book');
     }
-    Book.clear();
+    Display.clear();
     event.preventDefault();
+}
+
+
+//add listener to Library form
+libraryForm.addEventListener('submit', libraryFormSubmit);
+
+//on window load display  items if any
+
+window.onload=(event)=>{
+    let books = localStorage.getItem('books');
+    let oldBooks;
+    if (books) {
+        oldBooks = JSON.parse(books); //parse data from local storage
+    } else {
+        oldBooks = [];
+    }
+    Display.loadDataCards(oldBooks);
 }
